@@ -41,15 +41,18 @@ end
 
 local function push_request_header(header_name, value, req_headers)
   local new_value = new_header_value(req_headers[header_name], value)
+  ngx.log(ngx.DEBUG, "pushing request header " .. header_name .. " with value: ", value)
   ngx.req.set_header(header_name, new_value)
 end
 
 local function set_request_header(header_name, value)
+  ngx.log(ngx.DEBUG, "setting request header " .. header_name .. " with value: ", value)
   ngx.req.set_header(header_name, value)
 end
 
 local function add_request_header(header_name, value, req_headers)
   if req_headers[header_name] then
+    ngx.log(ngx.DEBUG, "adding request header " .. header_name .. " with value: ", value)
     push_request_header(header_name, value, req_headers)
   end
 end
@@ -66,10 +69,13 @@ local function process_introspection_response(introspect_token_response,headers_
   for _, header_config in ipairs(headers_config) do
     local header_func = header_functions[header_config.op]
     local value = ""
+
     if header_config.value_type == "plain" then
       value = introspect_token_response[header_config.template_string:render()]
+      ngx.log(ngx.DEBUG, 'introspect_token_response[header_config.template_string:render()]:', value)
     else
       value = header_config.template_string:render(introspect_token_response)
+      ngx.log(ngx.DEBUG, 'header_config.template_string:render(introspect_token_response):', value)
     end
 
     header_func(header_config.header, value, req_headers)
