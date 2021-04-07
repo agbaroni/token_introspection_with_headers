@@ -65,7 +65,12 @@ local function process_introspection_response(introspect_token_response,headers_
 
   for _, header_config in ipairs(headers_config) do
     local header_func = header_functions[header_config.op]
-    local value = header_config.template_string:render(introspect_token_response)
+    local value = ""
+    if header_config.value_type == "plain" then
+      value = introspect_token_response[header_config.template_string:render()]
+    else
+      value = header_config.template_string:render(introspect_token_response)
+    end
 
     header_func(header_config.header, value, req_headers)
   end
