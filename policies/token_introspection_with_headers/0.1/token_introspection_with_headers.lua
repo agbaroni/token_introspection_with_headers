@@ -64,10 +64,10 @@ local function process_introspection_response(introspect_token_response,headers_
   local req_headers = ngx.req.get_headers() or {}
 
   for _, header_config in ipairs(headers_config) do
-    local command_func = command_functions[header_config.op]
+    local header_func = header_functions[header_config.op]
     local value = header_config.template_string:render(introspect_token_response)
 
-    command_func(header_config.header, value, req_headers)
+    header_func(header_config.header, value, req_headers)
   end
   return 
 end
