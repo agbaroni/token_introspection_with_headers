@@ -153,9 +153,10 @@ function _M:access(context)
       ngx.say(context.service.error_auth_failed)
       return ngx.exit(ngx.status)
     else
+      local raw_token_info=cjson.encode(introspect_token_response)
       ngx.log(ngx.INFO, 'token introspection for access token ', access_token, ': token active, extracting claims...')
-      ngx.log(ngx.INFO, 'token introspection response: ',introspect_token_response)
-      process_introspection_response(introspect_token_response,self.headers_config)
+      ngx.log(ngx.INFO, 'token introspection response: ',raw_token_info)
+      process_introspection_response(raw_token_info,self.headers_config)
     end
   end
 end
