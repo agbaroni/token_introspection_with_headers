@@ -143,7 +143,7 @@ function _M:access(context)
       return ngx.exit(ngx.status)
     else
       ngx.log(ngx.INFO, 'token introspection for access token ', access_token, ': token active, extracting claims...')
-      process_introspection_response(introspect_token_response,self.header_config)
+      process_introspection_response(introspect_token_response,self.headers_config)
     end
   end
 end
