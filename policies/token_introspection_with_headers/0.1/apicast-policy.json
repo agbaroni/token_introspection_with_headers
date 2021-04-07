@@ -1,0 +1,121 @@
+{
+  "$schema": "http://apicast.io/policy-v1/schema#manifest#",
+  "name": "APIcast Token Introspection With Claim Extraction Policy",
+  "summary": "This policy is an extention of the default token introspection policy.",
+  "description": "This policy is an extention of the default token introspection policy which allows to extract claims from the introspection response and put them into HTTP headers",
+  "version": "0.1",
+  "configuration": {
+    "type": "object",
+    "properties": {
+      "introspection": {
+        "type": "object",
+        "properties": {
+          "auth_type": {
+            "type": "string",
+            "enum": ["use_3scale_oidc_issuer_endpoint", "client_id+client_secret"],
+            "default": "client_id+client_secret"
+          },
+          "max_ttl_tokens": {
+            "description": "Max TTL for cached tokens",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          },
+          "max_cached_tokens": {
+            "description": "Max number of tokens to cache",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000
+          }
+        },
+        "required": [
+          "auth_type"
+        ],
+        "dependencies": {
+          "auth_type": {
+            "oneOf": [{
+              "properties": {
+                "auth_type": {
+                  "describe": "Use the Client credentials and the Token Introspection Endpoint from the OpenID Connect Issuer setting.",
+                  "enum": ["use_3scale_oidc_issuer_endpoint"]
+                }
+              }
+            }, {
+              "properties": {
+                "auth_type": {
+                  "describe": "Specify the Token Introspection Endpoint, Client ID, and Client Secret.",
+                  "enum": ["client_id+client_secret"]
+                },
+                "client_id": {
+                  "description": "Client ID for the Token Introspection Endpoint",
+                  "type": "string"
+                },
+                "client_secret": {
+                  "description": "Client Secret for the Token Introspection Endpoint",
+                  "type": "string"
+                },
+                "introspection_url": {
+                  "description": "Introspection Endpoint URL",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "client_id", "client_secret", "introspection_url"
+              ]
+            }]
+          }
+        },
+        "headers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "op": {
+                "description": "Operation to be applied",
+                "type": "string",
+                "oneOf": [
+                  {
+                    "enum": ["add"],
+                    "title": "Add a value to an existing header."
+                  },
+                  {
+                    "enum": ["set"],
+                    "title": "Create the header when not set, replace its value when set."
+                  },
+                  {
+                    "enum": ["push"],
+                    "title": "Create the header when not set, add the value when set."
+                  }
+                ]
+              },
+              "header": {
+                "description": "Header to be modified",
+                "type": "string"
+              },
+              "value": {
+                "description": "Identifies the claim to be extracted from the introspection response and put into the header",
+                "type": "string"
+              },
+              "value_type": {
+                "description": "How to evaluate 'value'",
+                "type": "string",
+                "oneOf": [
+                  {
+                    "enum": ["plain"],
+                    "title": "Evaluate 'value' as plain text."
+                  },
+                  {
+                    "enum": ["liquid"],
+                    "title": "Evaluate 'value' as liquid."
+                  }
+                ],
+                "default": "plain"
+              }
+            },
+            "required": ["op", "header"]
+          }
+        }
+      }
+    }
+  }
+}
