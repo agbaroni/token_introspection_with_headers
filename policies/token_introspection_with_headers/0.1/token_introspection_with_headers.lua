@@ -71,7 +71,14 @@ local function process_introspection_response(introspect_token_response,headers_
   end
   return 
 end
+-- initialize the header templates
 
+local function build_templates(headers)
+  for _, header in ipairs(headers) do
+    header.template_string = TemplateString.new(
+      header.value, header.value_type or default_value_type)
+  end
+end
 --- token introspection functions
 
 local function create_credential(client_id, client_secret)
@@ -186,14 +193,7 @@ function _M.new(config)
 
 end
 
--- initialize the header templates
 
-local function build_templates(headers)
-  for _, header in ipairs(headers) do
-    header.template_string = TemplateString.new(
-      header.value, header.value_type or default_value_type)
-  end
-end
 
 --[[
 function _M:init()
