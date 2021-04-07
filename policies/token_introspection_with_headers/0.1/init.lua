@@ -1,1 +1,1 @@
-return require('example')
+return require('token_introspection_with_headers')
