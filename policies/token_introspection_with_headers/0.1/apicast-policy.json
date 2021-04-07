@@ -64,56 +64,56 @@
               ]
             }]
           }
-        },
-        "headers": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "op": {
-                "description": "Operation to be applied",
-                "type": "string",
-                "oneOf": [
-                  {
-                    "enum": ["add"],
-                    "title": "Add a value to an existing header."
-                  },
-                  {
-                    "enum": ["set"],
-                    "title": "Create the header when not set, replace its value when set."
-                  },
-                  {
-                    "enum": ["push"],
-                    "title": "Create the header when not set, add the value when set."
-                  }
-                ]
-              },
-              "header": {
-                "description": "Header to be modified",
-                "type": "string"
-              },
-              "value": {
-                "description": "Identifies the claim to be extracted from the introspection response and put into the header",
-                "type": "string"
-              },
-              "value_type": {
-                "description": "How to evaluate 'value'",
-                "type": "string",
-                "oneOf": [
-                  {
-                    "enum": ["plain"],
-                    "title": "Evaluate 'value' as plain text."
-                  },
-                  {
-                    "enum": ["liquid"],
-                    "title": "Evaluate 'value' as liquid."
-                  }
-                ],
-                "default": "plain"
-              }
+        }
+      },
+      "headers": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "op": {
+              "description": "Operation to be applied",
+              "type": "string",
+              "oneOf": [
+                {
+                  "enum": ["add"],
+                  "title": "Add a value to an existing header."
+                },
+                {
+                  "enum": ["set"],
+                  "title": "Create the header when not set, replace its value when set."
+                },
+                {
+                  "enum": ["push"],
+                  "title": "Create the header when not set, add the value when set."
+                }
+              ]
             },
-            "required": ["op", "header"]
-          }
+            "header": {
+              "description": "Header to be modified",
+              "type": "string"
+            },
+            "value": {
+              "description": "Identifies the claim to be extracted from the introspection response and put into the header",
+              "type": "string"
+            },
+            "value_type": {
+              "description": "How to evaluate 'value'",
+              "type": "string",
+              "oneOf": [
+                {
+                  "enum": ["plain"],
+                  "title": "Evaluate 'value' as plain text."
+                },
+                {
+                  "enum": ["liquid"],
+                  "title": "Evaluate 'value' as liquid."
+                }
+              ],
+              "default": "plain"
+            }
+          },
+          "required": ["op", "header"]
         }
       }
     }
