@@ -73,7 +73,7 @@ local function process_introspection_response(introspect_token_response,headers_
     if header_config.value_type == "plain" then
       value = introspect_token_response[header_config.value] or ""
       ngx.log(ngx.DEBUG, 'introspect_token_response[header_config.template_string:render()]:', value)
-    else if header_config.value_type == "array" then
+    elseif header_config.value_type == "array" then
       local array_value = introspect_token_response[header_config.value] or {}
       for _, item_value in ipairs(array_value) do
         if value == "" then
@@ -82,7 +82,7 @@ local function process_introspection_response(introspect_token_response,headers_
           value = value .. " " .. item_value
         end
       end
-    else if header_config.value_type == "object" then
+    elseif header_config.value_type == "object" then
       value = cjson.encode(introspect_token_response[header_config.value])
     else
       ngx.log(ngx.ERR, 'invalid type ',header_config.value_type,' specified for:', header_config.value)
