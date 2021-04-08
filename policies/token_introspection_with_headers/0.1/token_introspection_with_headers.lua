@@ -69,7 +69,7 @@ local function process_introspection_response(introspect_token_response,headers_
   for _, header_config in ipairs(headers_config) do
     local header_func = header_functions[header_config.op]
     local value = ""
-
+    ngx.log(ngx.INFO,"\n\n\n\n\n",cjson.encode(introspect_token_response),"\n\n\n\n\n\n")
     if header_config.value_type == "plain" then
       value = introspect_token_response[header_config.value] or ""
       ngx.log(ngx.DEBUG, 'introspect_token_response[header_config.template_string:render()]:', value)
@@ -87,7 +87,7 @@ local function process_introspection_response(introspect_token_response,headers_
     else
       ngx.log(ngx.ERR, 'invalid type ',header_config.value_type,' specified for:', header_config.value)
     end
-    ngx.log(ngx.ERR, 'extracted ',header_config.value,' of type ',header_config.value_type,': ', value)
+    ngx.log(ngx.INFO, 'extracted ',header_config.value,' of type ',header_config.value_type,': ', value)
     header_func(header_config.header, value, req_headers)
   end
   return 
