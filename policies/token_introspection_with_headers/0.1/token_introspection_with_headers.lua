@@ -71,25 +71,35 @@ local function process_introspection_response(introspect_token_response,headers_
     local value = ""
 
     if header_config.value_type == "plain" then
-      value = introspect_token_response[header_config.template_string:render()]
+      value = introspect_token_response[header_config.value] or ""
       ngx.log(ngx.DEBUG, 'introspect_token_response[header_config.template_string:render()]:', value)
+    else if header_config.value_type == "array" then
+      local array_value = introspect_token_response[header_config.value] or {}
+      for _, item_value in ipairs(array_value) do
+        if value == "" then
+          value = item_value
+        else
+          value = value .. " " .. item_value
+        end
+      end
+    else if header_config.value_type == "object" then
+      value = cjson.encode(introspect_token_response[header_config.value])
     else
-      value = header_config.template_string:render(introspect_token_response)
-      ngx.log(ngx.DEBUG, 'header_config.template_string:render(introspect_token_response):', value)
+      ngx.log(ngx.ERR, 'invalid type ',header_config.value_type,' specified for:', header_config.value)
     end
-
+    ngx.log(ngx.ERR, 'extracted ',header_config.value,' of type ',header_config.value_type,': ', value)
     header_func(header_config.header, value, req_headers)
   end
   return 
 end
--- initialize the header templates
+-- -- initialize the header templates
 
-local function build_templates(headers)
-  for _, header in ipairs(headers) do
-    header.template_string = TemplateString.new(
-      header.value, header.value_type or default_value_type)
-  end
-end
+-- local function build_templates(headers)
+--   for _, header in ipairs(headers) do
+--     header.template_string = TemplateString.new(
+--       header.value, header.value_type or default_value_type)
+--   end
+-- end
 --- token introspection functions
 
 local function create_credential(client_id, client_secret)
@@ -153,10 +163,9 @@ function _M:access(context)
       ngx.say(context.service.error_auth_failed)
       return ngx.exit(ngx.status)
     else
-      local raw_token_info=cjson.encode(introspect_token_response)
+      
       ngx.log(ngx.INFO, 'token introspection for access token ', access_token, ': token active, extracting claims...')
-      ngx.log(ngx.INFO, 'token introspection response: ',raw_token_info)
-      process_introspection_response(raw_token_info,self.headers_config)
+      process_introspection_response(introspect_token_response,self.headers_config)
     end
   end
 end
@@ -200,7 +209,7 @@ function _M.new(config)
   -- header section initialization
   self.headers_config = config.headers or {}
 
-  build_templates(self.headers_config)
+  --build_templates(self.headers_config)
   
   return self
 

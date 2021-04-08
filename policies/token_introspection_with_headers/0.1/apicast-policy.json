@@ -106,8 +106,12 @@
                   "title": "Evaluate 'value' as plain text."
                 },
                 {
-                  "enum": ["liquid"],
-                  "title": "Evaluate 'value' as liquid."
+                  "enum": ["array"],
+                  "title": "Evaluate 'value' as array, the members will be put as a command separated values list."
+                },
+                {
+                  "enum": ["object"],
+                  "title": "Evaluate 'value' as JSON object, the value will be put as JSON string."
                 }
               ],
               "default": "plain"
