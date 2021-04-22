@@ -1,8 +1,8 @@
 apiVersion: v1
 kind: Template
 metadata:
-  name: "apicast-example-policy"
-message: "APIcast Example Policy"
+  name: "apicast-token-headers-policy"
+message: "APIcast Token Introspection With Headers Policy"
 objects:
 
 - apiVersion: v1
@@ -19,12 +19,12 @@ objects:
     annotations:
     labels:
       app: apicast
-    name: apicast-example-policy
+    name: apicast-token-with-headers-policy
   spec:
     output:
       to:
         kind: ImageStreamTag
-        name: apicast-policy:example
+        name: apicast-policy:tokenintrospect
     source:
       git:
         uri: https://github.com/fceresol/token_introspection_with_headers.git
@@ -49,7 +49,7 @@ objects:
     output:
       to:
         kind: ImageStreamTag
-        name: 'amp-apicast:latest'
+        name: 'amp-apicast:custom'
     postCommit:
       args:
         - '--test'
@@ -62,7 +62,7 @@ objects:
       images:
         - from:
             kind: ImageStreamTag
-            name: 'apicast-policy:example'
+            name: 'apicast-policy:tokenintrospect'
           paths:
             # copy policy source code into the new image
             - destinationDir: policies
