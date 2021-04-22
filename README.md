@@ -47,6 +47,13 @@ Parameter name| Description | Default value | Allowed Values | Required |
 |value|Identifies the claim to be extracted from the introspection response and put into the header|||false|
 |value_type|How to evaluate 'value'|plain|**plain**:Evaluate 'value' as plain text.<br>**liquid**: Evaluate 'value' as liquid.| false|
 
+# Openshift Operator configuration
+
+If the ImageStream has been created in the same project where APICast resides, add the following line to the APICast spec in the Operator CR:
+
+image: 'image-registry.openshift-image-registry.svc:5000/**\<Project Name>**/amp-apicast:custom'
+
+**Note:** is important to change both the 3Scale managed and the external APICasts images since the 3Scale managed Staging APICast is being used by 3Scale Admin as policy repository. If the component isn't updated the policy won't be available in 3Scale console.
 
 # License
 
