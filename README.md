@@ -3,7 +3,6 @@
 
 This policy is an evolution of the token introspection policy which allows to extract some claims from the response and put in HTTP headers.
 
-
 ## OpenShift
 
 To install this on OpenShift you can use provided template:
@@ -23,8 +22,8 @@ The configuration is built over two section:
 - headers section
 
 ### Introspection section
-the configuration parameters are the same of the original Token Introspection policy:
 
+the configuration parameters are the same of the original Token Introspection policy:
 
 |Parameter name| Description | Default value | Allowed Values | Required |
 |----|----|----|----|----|
@@ -38,6 +37,7 @@ the configuration parameters are the same of the original Token Introspection po
 more informations about the parameters can be found in [3Scale APICast documentation](https://access.redhat.com/documentation/en-us/red_hat_3scale_api_management/2.10/html/administering_the_api_gateway/apicast_policies#token_introspection)
 
 ### Headers section
+
 the headers section allows multiple **header** elements:
 
 |Parameter name| Description | Default value | Allowed Values | Required |
@@ -50,10 +50,12 @@ the headers section allows multiple **header** elements:
 # Openshift Operator configuration
 
 Add the following line to the APICast spec in the Operator CR replacing &lt;Project Name&gt; with the name of the project where the ImageStream resides:
+
 ```yaml
 image: 'image-registry.openshift-image-registry.svc:5000/<Project 
 Name>/amp-apicast:custom'
 ```
+
 **Note:** is important to change both the 3Scale managed and the external APICasts images since the 3Scale managed Staging APICast is being used by 3Scale Admin as policy repository. If the component isn't updated the policy won't be available in 3Scale console.
 
 # License
