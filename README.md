@@ -12,9 +12,8 @@ To install this on OpenShift you can use provided template:
 oc new-app -f openshift.yml --param AMP_RELEASE=2.10
 ```
 
-The template creates new ImageStream for images containing this policy.
-Then it creates two BuildConfigs: one for building an image to apicast-policy ImageStream
-and second one for creating new APIcast image copying just necessary code from that previous image.
+The template creates a new ***ImageStream*** for storing the custom images containing this policy.
+Then it creates two ***BuildConfigs***: one for building an image to ```apicast-policy``` ImageStream and second one for creating new APIcast image copying just the necessary code from the previous image.
 
 ## Configuration
 
@@ -40,7 +39,8 @@ more informations about the parameters can be found in [3Scale APICast documenta
 
 ### Headers section
 the headers section allows multiple **header** elements:
-Parameter name| Description | Default value | Allowed Values | Required |
+
+|Parameter name| Description | Default value | Allowed Values | Required |
 |----|----|----|----|----|
 |op|Operation to be applied||**add**: Add a value to an existing header<br>**set**: Create the header when not set, replace its value when set.<br>**push**:Create the header when not set, add the value when set.|true|
 |header|Header to be modified|||true|
@@ -49,10 +49,11 @@ Parameter name| Description | Default value | Allowed Values | Required |
 
 # Openshift Operator configuration
 
-If the ImageStream has been created in the same project where APICast resides, add the following line to the APICast spec in the Operator CR:
-
-image: 'image-registry.openshift-image-registry.svc:5000/**\<Project Name>**/amp-apicast:custom'
-
+Add the following line to the APICast spec in the Operator CR replacing &lt;Project Name&gt; with the name of the project where the ImageStream resides:
+```yaml
+image: 'image-registry.openshift-image-registry.svc:5000/<Project 
+Name>/amp-apicast:custom'
+```
 **Note:** is important to change both the 3Scale managed and the external APICasts images since the 3Scale managed Staging APICast is being used by 3Scale Admin as policy repository. If the component isn't updated the policy won't be available in 3Scale console.
 
 # License
