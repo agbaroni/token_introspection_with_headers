@@ -4,6 +4,25 @@ metadata:
   name: "apicast-token-headers-policy"
 message: "APIcast Token Introspection With Headers Policy"
 objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+    labels:
+      app: apicast
+    name: apicast-image
+    spec:
+      lookupPolicy:
+        local: false
+      tags:
+        - name: '${AMP_RELEASE}'
+          annotations:
+            openshift.io/display-name: AMP APIcast ${AMP_RELEASE}
+          from:
+            kind: DockerImage
+            name: 'registry.redhat.io/3scale-amp2/apicast-gateway-rhel8:3scale${AMP_RELEASE}'
+          referencePolicy:
+            type: Source
 
 - apiVersion: v1
   kind: ImageStream
@@ -35,7 +54,7 @@ objects:
       sourceStrategy:
         from:
           kind: ImageStreamTag
-          name: 'amp-apicast:${AMP_RELEASE}'
+          name: 'apicast-image:${AMP_RELEASE}'
 
 - apiVersion: v1
   kind: BuildConfig
@@ -49,7 +68,7 @@ objects:
     output:
       to:
         kind: ImageStreamTag
-        name: 'amp-apicast:custom'
+        name: 'apicast-image:custom'
     postCommit:
       args:
         - '--test'
@@ -80,7 +99,7 @@ objects:
       dockerStrategy:
         from:
           kind: ImageStreamTag
-          name: 'amp-apicast:${AMP_RELEASE}'
+          name: 'apicast-image:${AMP_RELEASE}'
       type: Docker
     triggers:
       - type: ConfigChange
