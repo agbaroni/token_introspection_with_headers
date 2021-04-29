@@ -14,6 +14,7 @@ local resty_url = require('resty.url')
 local tokens_cache = require('tokens_cache')
 
 local tonumber = tonumber
+local insert = table.insert
 
 local new = _M.new
 -- set a noop cache dummy function for disabling the cache
@@ -23,6 +24,7 @@ local noop_cache = { get = noop, set = noop }
 -- templating engine for claim extraction
 local TemplateString = require 'apicast.template_string'
 local default_value_type = 'plain'
+
 
 -- header manipulation functions
 
