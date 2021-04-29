@@ -11,18 +11,18 @@ objects:
     labels:
       app: apicast
     name: apicast-image
-    spec:
-      lookupPolicy:
-        local: false
-      tags:
-        - name: '${AMP_RELEASE}'
-          annotations:
-            openshift.io/display-name: AMP APIcast ${AMP_RELEASE}
-          from:
-            kind: DockerImage
-            name: 'registry.redhat.io/3scale-amp2/apicast-gateway-rhel8:3scale${AMP_RELEASE}'
-          referencePolicy:
-            type: Source
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+      - name: '${AMP_RELEASE}'
+        annotations:
+          openshift.io/display-name: AMP APIcast ${AMP_RELEASE}
+        from:
+          kind: DockerImage
+          name: 'registry.redhat.io/3scale-amp2/apicast-gateway-rhel8:3scale${AMP_RELEASE}'
+        referencePolicy:
+          type: Source
 
 - apiVersion: v1
   kind: ImageStream
