@@ -44,6 +44,7 @@ end
 -- utility function to convert values
 local function _convert_value_to_table(value)
   if type(value) == "string" then
+    ngx.log(ngx.DEBUG, "converting string to array of strings ...")
     return { value }
   end
 
@@ -71,11 +72,8 @@ end
 
 local function add_request_header(header_name, value, req_headers, is_array)
   if req_headers[header_name] then
-    if is_array then
-      value = cjson.encode(_convert_value_to_table(value))
-    end
     ngx.log(ngx.DEBUG, "adding request header " .. header_name .. " with value: ", value)
-    push_request_header(header_name, value, req_headers)
+    push_request_header(header_name, value, req_headers, is_array)
   end
 end
 
