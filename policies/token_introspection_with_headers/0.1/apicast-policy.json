@@ -89,6 +89,10 @@
                 }
               ]
             },
+            "is_array": {
+              "description": "Check this box if the value is an array",
+              "type": "boolean"
+            },
             "header": {
               "description": "Header to be modified",
               "type": "string"
