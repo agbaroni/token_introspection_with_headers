@@ -82,11 +82,11 @@ local function process_introspection_response(introspect_token_response,headers_
     local value = ""
 
     if header_config.value_type == "plain" then
-      value = introspect_token_response[header_config.template_string:render()]
-      ngx.log(ngx.DEBUG, 'introspect_token_response[header_config.template_string:render()]:(',header_config.template_string:render(),') ', cjson.encode(_convert_value_to_table(value)))
+      value = cjson.encode(_convert_value_to_table(introspect_token_response[header_config.template_string:render()]))
+      ngx.log(ngx.DEBUG, 'introspect_token_response[header_config.template_string:render()]:(',header_config.template_string:render(),') ', value)
     else
-      value = header_config.template_string:render(introspect_token_response)
-      ngx.log(ngx.DEBUG, 'header_config.template_string:render(introspect_token_response):', cjson.encode(_convert_value_to_table(value)))
+      value = cjson.encode(_convert_value_to_table(header_config.template_string:render(introspect_token_response)))
+      ngx.log(ngx.DEBUG, 'header_config.template_string:render(introspect_token_response):', value)
     end
 
     header_func(header_config.header, value, req_headers)
