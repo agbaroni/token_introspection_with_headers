@@ -59,6 +59,15 @@ local function add_request_header(header_name, value, req_headers)
   end
 end
 
+-- utility function to convert values
+local function _convert_value_to_table(value)
+  if type(value) == "string" then
+    return { value }
+  end
+
+  return value
+end
+
 local header_functions = {
     push = push_request_header,
     add = add_request_header,
@@ -74,10 +83,10 @@ local function process_introspection_response(introspect_token_response,headers_
 
     if header_config.value_type == "plain" then
       value = introspect_token_response[header_config.template_string:render()]
-      ngx.log(ngx.DEBUG, 'introspect_token_response[header_config.template_string:render()]:(',header_config.template_string:render(),') ', value)
+      ngx.log(ngx.DEBUG, 'introspect_token_response[header_config.template_string:render()]:(',header_config.template_string:render(),') ', cjson.encode(_convert_value_to_table(value)))
     else
       value = header_config.template_string:render(introspect_token_response)
-      ngx.log(ngx.DEBUG, 'header_config.template_string:render(introspect_token_response):', value)
+      ngx.log(ngx.DEBUG, 'header_config.template_string:render(introspect_token_response):', cjson.encode(_convert_value_to_table(value)))
     end
 
     header_func(header_config.header, value, req_headers)
