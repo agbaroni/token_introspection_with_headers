@@ -41,24 +41,6 @@ local function new_header_value(current_value, value_to_add)
   return new_value
 end
 
-local function push_request_header(header_name, value, req_headers)
-  local new_value = new_header_value(req_headers[header_name], value)
-  ngx.log(ngx.DEBUG, "pushing request header " .. header_name .. " with value: ", value)
-  ngx.req.set_header(header_name, new_value)
-end
-
-local function set_request_header(header_name, value)
-  ngx.log(ngx.DEBUG, "setting request header " .. header_name .. " with value: ", value)
-  ngx.req.set_header(header_name, value)
-end
-
-local function add_request_header(header_name, value, req_headers)
-  if req_headers[header_name] then
-    ngx.log(ngx.DEBUG, "adding request header " .. header_name .. " with value: ", value)
-    push_request_header(header_name, value, req_headers)
-  end
-end
-
 -- utility function to convert values
 local function _convert_value_to_table(value)
   if type(value) == "string" then
@@ -66,6 +48,35 @@ local function _convert_value_to_table(value)
   end
 
   return value
+end
+
+local function push_request_header(header_name, value, req_headers, is_array)
+  local new_value = ""
+  if is_array then
+    new_value = new_header_value(req_headers[header_name], cjson.encode(_convert_value_to_table(value)))
+  else
+    new_value = new_header_value(req_headers[header_name], value)
+  end
+  ngx.log(ngx.DEBUG, "pushing request header " .. header_name .. " with value: ", value)
+  ngx.req.set_header(header_name, new_value)
+end
+
+local function set_request_header(header_name, value, is_array)
+  if is_array then
+    value = cjson.encode(_convert_value_to_table(value))
+  end
+  ngx.log(ngx.DEBUG, "setting request header " .. header_name .. " with value: ", value)
+  ngx.req.set_header(header_name, value)
+end
+
+local function add_request_header(header_name, value, req_headers, is_array)
+  if req_headers[header_name] then
+    if is_array then
+      value = cjson.encode(_convert_value_to_table(value))
+    end
+    ngx.log(ngx.DEBUG, "adding request header " .. header_name .. " with value: ", value)
+    push_request_header(header_name, value, req_headers)
+  end
 end
 
 local header_functions = {
@@ -83,15 +94,13 @@ local function process_introspection_response(introspect_token_response,headers_
 
     if header_config.value_type == "plain" then
       value = introspect_token_response[header_config.template_string:render()]
-      -- x_value = cjson.encode(_convert_value_to_table(value))
       ngx.log(ngx.DEBUG, 'introspect_token_response[header_config.template_string:render()]:(',header_config.template_string:render(),') ', value)
     else
       value = header_config.template_string:render(introspect_token_response)
-      -- x_value = cjson.encode(_convert_value_to_table(value))
       ngx.log(ngx.DEBUG, 'header_config.template_string:render(introspect_token_response):', value)
     end
 
-    header_func(header_config.header, value, req_headers)
+    header_func(header_config.header, value, req_headers, header_config.is_array)
   end
   return 
 end
