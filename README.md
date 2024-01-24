@@ -46,6 +46,7 @@ the headers section allows multiple **header** elements:
 |header|Header to be modified|||true|
 |value|Identifies the claim to be extracted from the introspection response and put into the header|||false|
 |value_type|How to evaluate 'value'|plain|**plain**:Evaluate 'value' as plain text.<br>**liquid**: Evaluate 'value' as liquid.| false|
+|is_array|Claims 'value' to be an array|false|| false|
 
 # Openshift Operator configuration
 
