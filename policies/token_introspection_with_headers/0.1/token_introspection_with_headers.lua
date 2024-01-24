@@ -90,6 +90,12 @@ local function process_introspection_response(introspect_token_response,headers_
     local header_func = header_functions[header_config.op]
     local value = ""
 
+    if header_config.is_array then
+      ngx.log(ngx.DEBUG, 'the value is an array')
+    else
+      ngx.log(ngx.DEBUG, 'the value is not an array')
+    end
+
     if header_config.value_type == "plain" then
       value = introspect_token_response[header_config.template_string:render()]
       ngx.log(ngx.DEBUG, 'introspect_token_response[header_config.template_string:render()]:(',header_config.template_string:render(),') ', value)
