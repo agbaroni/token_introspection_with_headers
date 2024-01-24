@@ -54,6 +54,7 @@ end
 local function push_request_header(header_name, value, req_headers, is_array)
   local new_value = ""
   if is_array then
+    ngx.log(ngx.DEBUG, 'encoding the value: ', value)
     new_value = new_header_value(req_headers[header_name], cjson.encode(_convert_value_to_table(value)))
   else
     new_value = new_header_value(req_headers[header_name], value)
@@ -62,8 +63,10 @@ local function push_request_header(header_name, value, req_headers, is_array)
   ngx.req.set_header(header_name, new_value)
 end
 
-local function set_request_header(header_name, value, is_array)
+local function set_request_header(header_name, value, req_headers, is_array)
+  -- req_headers unused
   if is_array then
+    ngx.log(ngx.DEBUG, 'encoding the value: ', value)
     value = cjson.encode(_convert_value_to_table(value))
   end
   ngx.log(ngx.DEBUG, "setting request header " .. header_name .. " with value: ", value)
