@@ -4,6 +4,8 @@ local _M = policy.new('Token Introspection Policy With Claim Extraction','0.1')
 -- json parser
 local cjson = require('cjson.safe')
 
+local rjwt = require('resty.jwt')
+
 -- http objects for introspection call
 local http_authorization = require 'resty.http_authorization'
 local http_ng = require 'resty.http_ng'
@@ -86,7 +88,7 @@ local header_functions = {
     set = set_request_header,
 }
 -- response processing and header setting function
-local function process_introspection_response(introspect_token_response,headers_config)
+local function process_introspection_response(introspect_token_response,headers_config,upsert_jwt,res_body)
   local req_headers = ngx.req.get_headers() or {}
 
   for _, header_config in ipairs(headers_config) do
@@ -109,6 +111,13 @@ local function process_introspection_response(introspect_token_response,headers_
 
     header_func(header_config.header, value, req_headers, header_config.is_array)
   end
+
+  ngx.log(ngx.DEBUG, "I've to replace bearer token? ", upsert_jwt)
+
+  if upsert_jwt == true then
+    set_request_header('Authorization', 'Bearer ' .. res_body)
+  end
+
   return 
 end
 -- initialize the header templates
@@ -141,10 +150,28 @@ local function introspect_token(self, token)
   end
 
   if res.status == 200 then
-    local token_info, decode_err = cjson.decode(res.body) -- lo trasforma in oggetto
+    local content_type = res.headers['Content-Type']
+    local token_info = nil
+    local decode_err = nil
+
+    ngx.log(ngx.DEBUG,'introspection response content type: ', content_type)
+
+    if self.config.jwt_is_encoded == true then
+      if content_type:match('^application/json') then
+        ngx.log(ngx.DEBUG,'introspection json format: ', res.body)
+        return { active = false }
+      else
+        token_info = rjwt:load_jwt(res.body)
+        ngx.log(ngx.DEBUG,'introspection json format: ', cjson.encode(token_info))
+      end
+    else
+      token_info, decode_err = cjson.decode(res.body) -- lo trasforma in oggetto
+    end
+
     if type(token_info) == 'table' then
       ngx.log(ngx.DEBUG,'introspection response: ', token_info)
       self.tokens_cache:set(token, token_info)
+      self.res_body = res.body
       return token_info
     else
       ngx.log(ngx.ERR, 'failed to parse token introspection response:', decode_err)
@@ -173,10 +200,19 @@ function _M:access(context)
   if self.introspection_url then
     local authorization = http_authorization.new(ngx.var.http_authorization)
     local access_token = authorization.token
+    ngx.log(ngx.DEBUG,'access token: ', access_token)
     local introspect_token_response = introspect_token(self, access_token)
     --- Introspection Response must have an "active" boolean value.
     -- https://tools.ietf.org/html/rfc7662#section-2.2
-    if not introspect_token_response.active == true then
+    local is_active = false
+
+    if introspect_token_response.payload ~= nil then
+      is_active = introspect_token_response.payload.active
+    else
+      is_active = introspect_token_response.active
+    end
+
+    if not is_active then
       ngx.log(ngx.INFO, 'token introspection for access token ', access_token, ': token not active')
       ngx.status = context.service.auth_failed_status
       ngx.say(context.service.error_auth_failed)
@@ -185,7 +221,7 @@ function _M:access(context)
       
       ngx.log(ngx.INFO, 'token introspection for access token ', access_token, ': token active, extracting claims...')
       ngx.log(ngx.INFO, 'token introspection response: ',introspect_token_response)
-      process_introspection_response(introspect_token_response,self.headers_config)
+      process_introspection_response(introspect_token_response,self.headers_config,self.config.upsert_jwt,self.res_body)
     end
   end
 end
@@ -198,6 +234,8 @@ end
 function _M.new(config)
   local self = new(config)
   self.config = config or {}
+  ngx.log(ngx.DEBUG,'config.is_jwt_encoded: ', self.config.jwt_is_encoded)
+  ngx.log(ngx.DEBUG,'config.upsert_jwt: ', self.config.upsert_jwt)
   self.introspection_config = config.introspection or {}
   -- token introspection initialization
   self.auth_type = self.introspection_config.auth_type or "client_id+client_secret"

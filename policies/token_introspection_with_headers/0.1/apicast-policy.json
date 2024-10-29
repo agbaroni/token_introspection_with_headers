@@ -66,6 +66,14 @@
           }
         }
       },
+      "jwt_is_encoded": {
+        "description": "Expects an encoded form of JWT token",
+        "type": "boolean"
+      },
+      "upsert_jwt": {
+        "description": "Update or insert the received JWT as bearer token",
+        "type": "boolean"
+      },
       "headers": {
         "type": "array",
         "items": {
