@@ -146,7 +146,7 @@ local function introspect_token(self, token)
     headers = {['Authorization'] = self.credential}}
   if err then
     ngx.log(ngx.WARN, 'token introspection error: ', err, ' url: ', self.introspection_url)
-    return { active = false }
+    return { active = false, external_error = true }
   end
 
   if res.status == 200 then
@@ -159,7 +159,7 @@ local function introspect_token(self, token)
     if self.config.jwt_is_encoded == true then
       if content_type:match('^application/json') then
         ngx.log(ngx.DEBUG,'introspection json format: ', res.body)
-        return { active = false }
+        return { active = false, external_error = false }
       else
         token_info = rjwt:load_jwt(res.body)
         ngx.log(ngx.DEBUG,'introspection json format: ', cjson.encode(token_info))
@@ -175,11 +175,11 @@ local function introspect_token(self, token)
       return token_info
     else
       ngx.log(ngx.ERR, 'failed to parse token introspection response:', decode_err)
-      return { active = false }
+      return { active = false, external_error = true }
     end
   else
     ngx.log(ngx.WARN, 'failed to execute token introspection. status: ', res.status)
-    return { active = false }
+    return { active = false, external_error = true }
   end
 end
 
@@ -205,6 +205,7 @@ function _M:access(context)
     --- Introspection Response must have an "active" boolean value.
     -- https://tools.ietf.org/html/rfc7662#section-2.2
     local is_active = false
+    local is_external_error = false
 
     if introspect_token_response.payload ~= nil then
       is_active = introspect_token_response.payload.active
@@ -212,9 +213,17 @@ function _M:access(context)
       is_active = introspect_token_response.active
     end
 
+    if introspect_token_response.external_error ~= nil then
+	is_external_error = introspect_token_response.external_error
+    end
+
     if not is_active then
       ngx.log(ngx.INFO, 'token introspection for access token ', access_token, ': token not active')
-      ngx.status = context.service.auth_failed_status
+      if is_external_error then
+	ngx.status = 502
+      else
+	ngx.status = context.service.auth_failed_status
+      end
       ngx.say(context.service.error_auth_failed)
       return ngx.exit(ngx.status)
     else
