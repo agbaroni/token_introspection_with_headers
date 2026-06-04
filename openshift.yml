@@ -1,10 +1,10 @@
-apiVersion: v1
+apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
   name: "apicast-token-headers-policy"
 message: "APIcast Token Introspection With Headers Policy"
 objects:
-- apiVersion: v1
+- apiVersion: image.openshift.io/v1
   kind: ImageStream
   metadata:
     annotations:
@@ -24,7 +24,7 @@ objects:
         referencePolicy:
           type: Source
 
-- apiVersion: v1
+- apiVersion: image.openshift.io/v1
   kind: ImageStream
   metadata:
     annotations:
@@ -32,7 +32,7 @@ objects:
       app: apicast
     name: apicast-policy
 
-- apiVersion: v1
+- apiVersion: build.openshift.io/v1
   kind: BuildConfig
   metadata:
     annotations:
@@ -56,7 +56,7 @@ objects:
           kind: ImageStreamTag
           name: 'apicast-image:${AMP_RELEASE}'
 
-- apiVersion: v1
+- apiVersion: build.openshift.io/v1
   kind: BuildConfig
   metadata:
     annotations:
