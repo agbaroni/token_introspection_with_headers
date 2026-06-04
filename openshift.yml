@@ -46,7 +46,7 @@ objects:
         name: apicast-policy:tokenintrospect
     source:
       git:
-        uri: https://github.com/fceresol/token_introspection_with_headers.git
+        uri: https://github.com/agbaroni/token_introspection_with_headers.git
         ref: 'master'
       type: Git
     strategy:
