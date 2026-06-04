@@ -14,6 +14,42 @@ oc new-app -f openshift.yml --param AMP_RELEASE=2.10
 The template creates a new ***ImageStream*** for storing the custom images containing this policy.
 Then it creates two ***BuildConfigs***: one for building an image to ```apicast-policy``` ImageStream and second one for creating new APIcast image copying just the necessary code from the previous image.
 
+### New way to attach policies
+
+```
+oc create secret generic token-introspection-policy --from-file=policies/token_introspection_with_headers/0.1/apicast-policy.json \
+                                                    --from-file=policies/token_introspection_with_headers/0.1/init.lua \
+                                                    --from-file=policies/token_introspection_with_headers/0.1/token_introspection_with_headers.lua \
+                                                    --from-file=policies/token_introspection_with_headers/0.1/tokens_cache.lua
+
+oc label secret token-introspection-policy "apimanager.apps.3scale.net/watched-by=apimanager"
+
+oc apply -f cpd.yaml
+```
+
+Then edit (od add) APIManager to add the policy:
+
+```
+...
+    stagingSpec:
+      ...
+      customPolicies:
+        - name: token_introspection
+          version: '0.1'
+          secretRef:
+            name: token-introspection-policy
+      ...
+    productionSpec:
+      ...
+      customPolicies:
+        - name: token_introspection
+          version: '0.1'
+          secretRef:
+            name: token-introspection-policy
+      ...
+...
+```
+
 ## Configuration
 
 The configuration is built over two section:
